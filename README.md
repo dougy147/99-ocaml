@@ -1,0 +1,2 @@
+- https://ocaml.org/exercises
+- https://v2.ocaml.org/learn/tutorials/99problems.html
