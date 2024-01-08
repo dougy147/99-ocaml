@@ -194,3 +194,45 @@ let encode list =
           e ((count index first)::acc) 1 (second::tail)
   in
   rev (e [] 1 list)
+
+
+(* Problem 14 : Duplicate the elements of a list *)
+
+let duplicate list =
+  let rec dup acc = function
+    | [] -> acc
+    | hd :: tl -> dup (hd::hd::acc) tl
+  in
+  List.rev (dup [] list)
+
+(* non tail recursive solution *)
+(*let rec duplicate = function
+  | [] -> []
+  | hd :: tl -> hd::hd::(duplicate tl)*)
+
+(* Problem 15 : Replicate the elements of a list a given number of times *)
+
+let replicate list repeat=
+  let rec mult acc index item =
+    if index = 0 then acc else mult (item::acc) (index-1) item
+    (* match index with
+    | 0 -> acc
+    | _ -> mult (item::acc) (index-1) item *)
+  in
+  let rec r list repeat =
+    match list with
+    | [] -> []
+    | hd :: tl -> (mult [] repeat hd) @ (r tl repeat)
+  in
+  r list repeat
+
+(* Problem 16 : Drop every N'th element from a list *)
+
+let drop list n =
+  let rec d original_n n = function
+    | [] -> []
+    | head :: tail -> if n = 1 then d original_n original_n tail else head::(d original_n (n-1) tail)
+  in
+  d n n list
+
+(* Original solution is better with index i: if i = n ... *)
