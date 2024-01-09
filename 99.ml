@@ -280,3 +280,22 @@ let remove_at k list =
   in
   r_at [] k list
 (* More performant than the example's solution *)
+
+(* Problem 21 : Insert an Element at a Given Position Into a List *)
+
+let insert_at element index list =
+  let rec aux acc elem index = function (* starting to use the name 'aux' that seems common use? *)
+    | [] -> (List.rev acc) @ [elem]
+    | l when index = 0 -> (List.rev acc) @ [elem] @ l
+    | hd :: tl -> aux (hd :: acc) elem (index-1) tl
+  in
+  aux [] element index list
+
+(* Problem 22 : Create a List Containing All Integers Within a Given Range *)
+(* not clear what is wanted if a > b *)
+
+let range a b =
+  let rec aux acc lower diff =
+    if diff = -1 then acc else aux (lower+diff::acc) lower (diff-1)
+  in
+  if a <= b then aux [] a (b-a) else List.rev (aux [] b (a-b))
