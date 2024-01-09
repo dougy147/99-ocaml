@@ -1,6 +1,8 @@
 (* https://ocaml.org/exercises *)
 (* https://v2.ocaml.org/learn/tutorials/99problems.html *)
 
+(* Working with lists *)
+
 (* Problem 01 : Tail of a List *)
 
 let rec last xs =
@@ -234,5 +236,47 @@ let drop list n =
     | head :: tail -> if n = 1 then d original_n original_n tail else head::(d original_n (n-1) tail)
   in
   d n n list
-
 (* Original solution is better with index i: if i = n ... *)
+
+
+(* Problem 17 : Split a List Into Two Parts; The Length of the First Part Is Given *)
+
+let split list length =
+  let rec s acc list l =
+    match list with
+    | [] -> (List.rev acc,[])
+    | hd :: tl as initlist -> if l = 0 then (List.rev acc,initlist) else s (hd::acc) tl (l-1)
+  in
+  s [] list length
+
+(* Problem 18 : Extract a slice from a list *)
+
+let slice list i k =
+  let rec s acc list i range =
+    match i,range with
+    | 0,0 -> List.rev (List.hd list :: acc)
+    | 0,_ -> if List.tl list = [] then
+               List.rev (List.hd list :: acc)
+             else
+               s (List.hd list::acc) (List.tl list) i (range-1)
+    | _ -> s acc (List.tl list) (i-1) range
+  in
+  if k < i || i >= length list then [] else s [] list i (k-i)
+
+(* Problem 19 : Rotate a list N places to the left *)
+
+let rotate list n =
+  let rec r acc n list =
+    if n = 0 then list @ (List.rev acc) else r (List.hd list::acc) (n-1) (List.tl list)
+  in
+  if List.length list = 0 then [] else r [] (n mod (List.length list)) list
+
+(* Problem 20 : Remove the K'th element from a list *)
+
+let remove_at k list =
+  let rec r_at acc k = function
+    | [] -> List.rev acc
+    | hd :: tl -> if k = 0 then (List.rev acc) @ tl else r_at (hd::acc) (k-1) tl
+  in
+  r_at [] k list
+(* More performant than the example's solution *)
