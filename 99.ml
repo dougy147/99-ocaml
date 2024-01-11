@@ -1,5 +1,5 @@
 (* https://ocaml.org/exercises *)
-(* https://v2.ocaml.org/learn/tutorials/99problems.html *)
+(* ERROR PRONE: https://v2.ocaml.org/learn/tutorials/99problems.html *)
 
 (* Working with lists *)
 
@@ -299,3 +299,128 @@ let range a b =
     if diff = -1 then acc else aux (lower+diff::acc) lower (diff-1)
   in
   if a <= b then aux [] a (b-a) else List.rev (aux [] b (a-b))
+
+
+(* Problem 23 : Extract a Given Number of Randomly Selected Elements From a List  *)
+(* Not explicit if draw with or without replacement. *)
+
+exception Unreachable of string;;
+(* with replacement *)
+let rand_select list number =
+  Random.init 0;
+  let rec nth index = function
+    | [] -> raise (Unreachable "Uh, unreachable no?")
+    | hd :: tl -> if index = 0 then [hd] else nth (index-1) tl
+  in
+  let rec aux acc list n =
+    if n = 0 then acc else aux ((nth (Random.int (List.length list)) list) @ acc) list (n-1)
+  in
+  aux [] list number
+
+(* without replacement *)
+let rand_select list number =
+  Random.init 0;
+  let rec pop acc index list =
+    match list with
+    | [] -> raise (Unreachable "Uh, unreachable no?")
+    | hd :: tl ->
+        if index = 0 then
+          hd,acc @ tl
+        else
+          pop (hd::acc) (index-1) tl
+  in
+  let rec aux acc list number =
+    match list with
+    | [] -> acc
+    | hd :: tl ->
+        if number = 0 then
+          acc
+        else
+          let popped,remaining = pop [] (Random.int (List.length list)) list in
+          aux (popped :: acc) remaining (number-1)
+  in
+  aux [] list number
+
+(* Problem 24 : Draw N Different Random Numbers From the Set 1..M *)
+(* There seems to be a trade-off between those two functions *)
+
+(* "Good" for small n but large m *)
+let lotto_select n m =
+  let rec is_in_acc list number =
+    match list with
+    | [] -> false
+    | hd :: _ when number = hd -> true
+    | hd :: tl -> is_in_acc tl number
+  in
+  let rec aux acc n m =
+    if List.length acc = n then
+      acc
+    else
+      let rn = (Random.int m) + 1 in
+      if is_in_acc acc rn then aux acc n m else if n = 0 then acc else aux (rn::acc) (n-1) m
+  in
+  aux [] n m
+
+(* "Good" for large m but small n *)
+let lotto_select n m = rand_select (range 1 m) n
+
+(* Problem 25 : Generate a Random Permutation of the Elements of a List *)
+
+(* If we remove "Random.init 0" from "rand_select" defined above:
+ * let permutation list = rand_select list (List.length list)
+ * else : *)
+
+let permutation list =
+  let rec pop acc index list =
+    match list with
+    | [] -> raise (Unreachable "Uh, unreachable no?")
+    | hd :: tl ->
+        if index = 0 then
+          hd,acc @ tl
+        else
+          pop (hd::acc) (index-1) tl
+  in
+  let rec aux acc list number =
+    match list with
+    | [] -> acc
+    | hd :: tl ->
+        if number = 0 then
+          acc
+        else
+          let popped,remaining = pop [] (Random.int (List.length list)) list in
+          aux (popped :: acc) remaining (number-1)
+  in
+  aux [] list (List.length list)
+
+(* Problem 26 : Generate the Combinations of K Distinct Objects Chosen From the N Elements of a List  *)
+
+let extract k list =
+  let rec concat acc list list2 =
+    match list2 with
+    | [] -> acc
+    | hd :: tl -> concat ((list @ [hd] ) :: acc) list tl
+  in
+  let rec aux acc k list =
+    match list with
+    | [] -> acc
+    | hd :: tl ->
+        if List.length tl >= k then
+          aux ((concat [] (hd::(slice tl 0 (k-2))) (slice tl (k-1) (List.length tl))) @ acc) k tl
+        else
+          acc
+  in
+  match k with
+  | 0 -> []
+  | 1 -> List.rev (concat [] [] list)
+  | _ -> List.rev (aux [] (k-1) list)
+
+(* Example's answer : way better and a lot more concise:
+ * let rec extract k list =
+ *   if k <= 0 then [[]]
+ *   else match list with
+ *        | [] -> []
+ *        | h :: tl ->
+ *           let with_h = List.map (fun l -> h :: l) (extract (k - 1) tl) in
+ *           let without_h = extract k tl in
+ *           with_h @ without_h;;
+ * *)
