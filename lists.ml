@@ -1,6 +1,3 @@
-(* https://ocaml.org/exercises *)
-(* ERROR PRONE: https://v2.ocaml.org/learn/tutorials/99problems.html *)
-
 (* Working with lists *)
 
 (* Problem 01 : Tail of a List *)
@@ -394,28 +391,29 @@ let permutation list =
 
 (* Problem 26 : Generate the Combinations of K Distinct Objects Chosen From the N Elements of a List  *)
 
-(* INCORRECT: does not work with extract 3 ["a";"b";"c";"d"] -> missing ["a";"c";"d"] *)
-let extract k list =
-  let rec concat acc list list2 =
-    match list2 with
-    | [] -> acc
-    | hd :: tl -> concat ((list @ [hd] ) :: acc) list tl
-  in
-  let rec aux acc k list =
-    match list with
-    | [] -> acc
-    | hd :: tl ->
-        if List.length tl >= k then
-          aux ((concat [] (hd::(slice tl 0 (k-2))) (slice tl (k-1) (List.length tl))) @ acc) k tl
-        else
-          acc
-  in
-  match k with
-  | 0 -> []
-  | 1 -> List.rev (concat [] [] list)
-  | _ -> List.rev (aux [] (k-1) list)
+(* INCORRECT: does not work with extract 3 ["a";"b";"c";"d"] -> missing ["a";"c";"d"]
+ * let extract k list =
+ *   let rec concat acc list list2 =
+ *     match list2 with
+ *     | [] -> acc
+ *     | hd :: tl -> concat ((list @ [hd] ) :: acc) list tl
+ *   in
+ *   let rec aux acc k list =
+ *     match list with
+ *     | [] -> acc
+ *     | hd :: tl ->
+ *         if List.length tl >= k then
+ *           aux ((concat [] (hd::(slice tl 0 (k-2))) (slice tl (k-1) (List.length tl))) @ acc) k tl
+ *         else
+ *           acc
+ *   in
+ *   match k with
+ *   | 0 -> []
+ *   | 1 -> List.rev (concat [] [] list)
+ *   | _ -> List.rev (aux [] (k-1) list)
+ *)
 
-(* Example's answer : way better and a lot more concise:
+(* Example's answer : way better, more concise and ... works: *)
   let rec extract k list =
     if k <= 0 then [[]]
     else match list with
@@ -424,36 +422,64 @@ let extract k list =
             let with_h = List.map (fun l -> h :: l) (extract (k - 1) tl) in
             let without_h = extract k tl in
             with_h @ without_h;;
- * *)
-
 
 (* Problem 27 : Group the elements of a set into disjoint subsets *)
+(* Hard one: I know what I want to do but I can't manage to do it! *)
+(*
+* let group group_list list_numbers =
+*
+*   let rec disjonction acc list1 list2 = (* returns disjonction of two lists *)
+*     match list1 with
+*     | [] -> List.rev acc @ list2
+*     | h1 :: t1 as l1 -> match list2 with
+*         | [] -> disjonction (h1::acc) t1 list2
+*         | h2 :: t2 -> if h1 = h2 then disjonction acc t1 t2 else disjonction (h2::acc) l1 t2 in
+*
+*   let rec extract k list =
+*     if k <= 0 then [[]]
+*     else match list with
+*          | [] -> []
+*          | h :: tl ->
+*             let with_h = List.map (fun l -> h :: l) (extract (k - 1) tl) in
+*             let without_h = extract k tl in
+*             with_h @ without_h in
+*
+*   let rec aux g n =
+*     match n with
+*     | [] -> []
+*     | [k] -> extract k g
+*     | k :: ktl ->
+*         let pos = extract k g in
+*         let dis = List.map (fun ext -> disjonction [] ext g) (extract k g) in
+*         pos @ dis
+*   in
+*   aux group_list list_numbers
+*
+*)
 
-let group group_list list_numbers =
+(* Problem 28 :  Sorting a list of lists according to length of sublists *)
+(* Given the example's solution, we "might not be allowed to use the built-in List.sort" function. At the moment, I don't mind (learning built-ins is also learning ;p). *)
 
-  let rec disjonction acc list1 list2 = (* returns disjonction of two lists *)
-    match list1 with
-    | [] -> List.rev acc @ list2
-    | h1 :: t1 as l1 -> match list2 with
-        | [] -> disjonction (h1::acc) t1 list2
-        | h2 :: t2 -> if h1 = h2 then disjonction acc t1 t2 else disjonction (h2::acc) l1 t2 in
+let length_sort list = List.sort (fun x y -> compare (List.length x) (List.length y)) list
 
-  let rec extract k list =
-    if k <= 0 then [[]]
-    else match list with
-         | [] -> []
-         | h :: tl ->
-            let with_h = List.map (fun l -> h :: l) (extract (k - 1) tl) in
-            let without_h = extract k tl in
-            with_h @ without_h in
-
-  let rec aux g n =
-    match n with
-    | [] -> []
-    | [k] -> extract k g
-    | k :: ktl ->
-        let pos = extract k g in
-        let dis = List.map (fun ext -> disjonction [] ext g) (extract k g) in
-        pos @ dis
+let frequency_sort list =
+  let original = list in
+  let rec count counter item list =
+    match list with
+    | [] -> counter
+    | hd :: tl -> if List.length hd = List.length item then count (counter+1) item tl else count counter item tl
   in
-  aux group_list list_numbers
+  let rec aux acc list =
+    match list with
+    | [] -> acc
+    | hd :: tl ->
+        let c = count 0 hd original in
+        aux ([(c,hd)] @ acc) tl
+  in
+  let sort_tuples tuples = List.sort (fun (x,xs) (y,ys) -> compare x y) tuples in
+  let rec extract_from_tuples acc tuples =
+    match tuples with
+    | [] -> List.rev acc
+    | (x,y) :: tl -> extract_from_tuples ([y] @ acc) tl
+  in
+  extract_from_tuples [] (sort_tuples (aux [] list))
