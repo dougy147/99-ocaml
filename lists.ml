@@ -390,8 +390,19 @@ let permutation list =
   aux [] list (List.length list)
 
 (* Problem 26 : Generate the Combinations of K Distinct Objects Chosen From the N Elements of a List  *)
+(* Copy of the example's solution to learn about List.map. *)
+let rec extract k list =
+  if k <= 0 then [[]] else
+  match list with
+  | [] -> []
+  | hd :: tl ->
+      let prepend_head = List.map (fun x -> hd :: x) (extract (k-1) tl) in
+      let without_head = extract k tl in
+      prepend_head @ without_head
 
-(* INCORRECT: does not work with extract 3 ["a";"b";"c";"d"] -> missing ["a";"c";"d"]
+(* Here is my first take to this problem, it is incorrect but maybe not that far of solving. To check again.*)
+(* e.g. DOES NOT work with extract 3 ["a";"b";"c";"d"] -> missing ["a";"c";"d"]
+
  * let extract k list =
  *   let rec concat acc list list2 =
  *     match list2 with
@@ -413,49 +424,33 @@ let permutation list =
  *   | _ -> List.rev (aux [] (k-1) list)
  *)
 
-(* Example's answer : way better, more concise and ... works: *)
-  let rec extract k list =
-    if k <= 0 then [[]]
-    else match list with
-         | [] -> []
-         | h :: tl ->
-            let with_h = List.map (fun l -> h :: l) (extract (k - 1) tl) in
-            let without_h = extract k tl in
-            with_h @ without_h;;
-
 (* Problem 27 : Group the elements of a set into disjoint subsets *)
-(* Hard one: I know what I want to do but I can't manage to do it! *)
-(*
-* let group group_list list_numbers =
-*
-*   let rec disjonction acc list1 list2 = (* returns disjonction of two lists *)
-*     match list1 with
-*     | [] -> List.rev acc @ list2
-*     | h1 :: t1 as l1 -> match list2 with
-*         | [] -> disjonction (h1::acc) t1 list2
-*         | h2 :: t2 -> if h1 = h2 then disjonction acc t1 t2 else disjonction (h2::acc) l1 t2 in
-*
-*   let rec extract k list =
-*     if k <= 0 then [[]]
-*     else match list with
-*          | [] -> []
-*          | h :: tl ->
-*             let with_h = List.map (fun l -> h :: l) (extract (k - 1) tl) in
-*             let without_h = extract k tl in
-*             with_h @ without_h in
-*
-*   let rec aux g n =
-*     match n with
-*     | [] -> []
-*     | [k] -> extract k g
-*     | k :: ktl ->
-*         let pos = extract k g in
-*         let dis = List.map (fun ext -> disjonction [] ext g) (extract k g) in
-*         pos @ dis
-*   in
-*   aux group_list list_numbers
-*
-*)
+(* Hard one for me. Does not take into account permutations when giving [1;1;1] as list_numbers.
+  i.e. 'group ["a";"b";"c"] [1;1;1]' returns [["a"];["b"];["c"]]; [["b"];["c"];["a"]]... even if are the same.
+ *)
+
+let group group_list numbers_list =
+  let rec disjonction acc list1 list2 =
+    match list1 with
+    | [] -> List.rev acc @ list2
+    | h1 :: t1 as l1 -> match list2 with
+        | [] -> disjonction (h1::acc) t1 list2
+        | h2 :: t2 -> if h1 = h2 then disjonction acc t1 t2 else disjonction (h2::acc) l1 t2 in
+
+  let rec aux acc g n =
+    match n with
+    | [] -> [[]]
+    | [k] -> List.map (fun x -> acc @ [x]) (extract k g)
+    | k :: ktl ->
+        let prefixes = extract k g in
+        prefixes
+        |> List.map (fun pref ->
+            (aux (acc@[pref]) (disjonction [] pref g) ktl)
+            )
+        |> List.flatten
+  in
+  aux [] group_list numbers_list
+
 
 (* Problem 28 :  Sorting a list of lists according to length of sublists *)
 (* Given the example's solution, we "might not be allowed to use the built-in List.sort" function. At the moment, I don't mind (learning built-ins is also learning ;p). *)
