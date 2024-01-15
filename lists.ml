@@ -34,13 +34,13 @@ It suffice to call it with : at 2 [1;2;3;4];;
 *)
 
 (* Problem 04 : Length of a List *)
-let length list =
-  let rec l acc list =
-    match list with
+let length xs =
+  let rec l acc xs =
+    match xs with
     | [] -> acc
     | _ :: t -> l (acc + 1) t
   in
-  l 0 list
+  l 0 xs
 
 (* Should do the same as: *)
 (* let length list =
@@ -53,18 +53,18 @@ let length list =
 
 (* Problem 05 : Reverse a List *)
 
-let rev list =
-  let rec r reversed list =
-    match list with
+let rev xs =
+  let rec r reversed xs =
+    match xs with
     | [] -> reversed
     | h :: t -> r (h :: reversed) t
   in
-  r [] list
+  r [] xs
 
 (* Problem 06 : Palindrome *)
 
-let palindrome list =
-  list = rev list
+let palindrome xs =
+  xs = rev xs
 
 (* Problem 07 : Flatten a nested list structure *)
 
@@ -73,19 +73,19 @@ type 'a node =
   | One of 'a
   | Many of 'a node list;;
 
-let flatten list =
-  let rec f acc list =
-    match list with
+let flatten xs =
+  let rec f acc xs =
+    match xs with
     | One x :: rest -> f (x :: acc) rest
     | Many x :: rest -> f acc (x @ rest)
     | _ -> rev acc
   in
-  f [] list
+  f [] xs
 
 (* Problem 08 : Eliminate Consecutive Duplicates *)
-let compress list =
-  let rec c acc list =
-    match list with
+let compress xs =
+  let rec c acc xs =
+    match xs with
     | [] -> acc
     | [x] -> x :: acc
     | x :: y :: rest ->
@@ -94,11 +94,11 @@ let compress list =
         else
           c (x :: acc) (y :: rest)
   in
-  rev (c [] list)
+  rev (c [] xs)
 
 (*  (* From the official example *)
-let rec compress2 list =
-  match list with
+let rec compress2 xs =
+  match xs with
   | first :: (second :: _ as t) ->
       if first = second then
         compress2 t
@@ -107,11 +107,11 @@ let rec compress2 list =
   | smaller -> smaller (*smaller means any value that hasn't been matched in the previous ones. It is an identifier*)
 *)
 
-(* Problem 09 : Pack consecutive duplicates into sublists*)
+(* Problem 09 : Pack consecutive duplicates into subxss*)
 
-let pack list =
-  let rec p acc acc2 list =
-    match list with
+let pack xs =
+  let rec p acc acc2 xs =
+    match xs with
     | [] -> acc2 @ [acc]
     | hd :: tl ->
         match acc with
@@ -122,17 +122,17 @@ let pack list =
             else
               p [hd] (acc2 @ [acc]) tl
   in
-  p [] [] list
+  p [] [] xs
 
 (* Problem 10 : Run-length encoding of a List *)
 
-let encode list =
-  let rec e acc list =
-    match list with
+let encode xs =
+  let rec e acc xs =
+    match xs with
     | [] | [] :: _ -> acc
     | (h::r) :: rest -> e ((length (h::r), h)::acc) rest
   in
-  e [] (rev (pack list))
+  e [] (rev (pack xs))
 
 (* Problem 11 : Modified run-length encoding*)
 
@@ -140,50 +140,50 @@ type 'a rle =
     | One of 'a
     | Many of int * 'a;;
 
-let encode list =
-  let rec modif acc list =
-    match list with
+let encode xs =
+  let rec modif acc xs =
+    match xs with
     | [] -> acc
     | (x,y) :: rest when x > 1 -> modif ((Many (x,y))::acc) rest
     | (x,y) :: rest -> modif ((One y)::acc) rest
   in
-  let rec e acc list =
-    match list with
+  let rec e acc xs =
+    match xs with
     | [] | [] :: _ -> rev (modif [] acc)
     | (h::r) :: rest -> e ((length (h::r), h)::acc) rest
   in
-  e [] (rev (pack list))
+  e [] (rev (pack xs))
 
 (* Problem 12 : Decode a run-length encoded list *)
 (* decode [Many (4, "a"); One "b"; Many (2, "c"); Many (2, "a"); One "d"; Many (4, "e")];; *)
 
-let decode list =
+let decode xs =
   let rec unwrap acc index symbol =
     match index with
     | 1 -> (symbol::acc)
     | _ -> unwrap (symbol::acc) (index-1) symbol
   in
-  let rec d acc list =
-    match list with
+  let rec d acc xs =
+    match xs with
     | [] -> rev acc
     | Many (x,y) :: rest -> d ((unwrap [] x y)@acc) rest
     | One x :: rest -> d (x::acc) rest
   in
-  d [] list
+  d [] xs
 
 (* Problem 13 : Run-length encoding of a list (direct solution) *)
 (* i.e. not storing the list of duplicates but immediately counting. *)
 
-let encode list =
+let encode xs =
   let count index symbol = if index = 1 then (One symbol) else (Many (index,symbol)) in
-  (*let rec label acc list = (*what first came to mind. non-optimal, right?*)
-    match list with
+  (*let rec label acc xs = (*what first came to mind. non-optimal, right?*)
+    match xs with
     | [] -> acc
     | (l,x)::tl when l > 1 -> label ((Many(l,x))::acc) tl
     | (l,x)::tl -> label ((One x)::acc) tl
   in*)
-  let rec e acc index list =
-    match list with
+  let rec e acc index xs =
+    match xs with
     | [] -> acc
     | hd :: [] -> (count index hd::acc)
     | first::second::tail ->
@@ -192,17 +192,17 @@ let encode list =
         else
           e ((count index first)::acc) 1 (second::tail)
   in
-  rev (e [] 1 list)
+  rev (e [] 1 xs)
 
 
 (* Problem 14 : Duplicate the elements of a list *)
 
-let duplicate list =
+let duplicate xs =
   let rec dup acc = function
     | [] -> acc
     | hd :: tl -> dup (hd::hd::acc) tl
   in
-  List.rev (dup [] list)
+  List.rev (dup [] xs)
 
 (* non tail recursive solution *)
 (*let rec duplicate = function
@@ -211,82 +211,82 @@ let duplicate list =
 
 (* Problem 15 : Replicate the elements of a list a given number of times *)
 
-let replicate list repeat=
+let replicate xs repeat=
   let rec mult acc index item =
     if index = 0 then acc else mult (item::acc) (index-1) item
     (* match index with
     | 0 -> acc
     | _ -> mult (item::acc) (index-1) item *)
   in
-  let rec r list repeat =
-    match list with
+  let rec r xs repeat =
+    match xs with
     | [] -> []
     | hd :: tl -> (mult [] repeat hd) @ (r tl repeat)
   in
-  r list repeat
+  r xs repeat
 
-(* Problem 16 : Drop every N'th element from a list *)
+(* Problem 16 : Drop every N'th element from a xs *)
 
-let drop list n =
+let drop xs n =
   let rec d original_n n = function
     | [] -> []
     | head :: tail -> if n = 1 then d original_n original_n tail else head::(d original_n (n-1) tail)
   in
-  d n n list
+  d n n xs
 (* Original solution is better with index i: if i = n ... *)
 
 
 (* Problem 17 : Split a List Into Two Parts; The Length of the First Part Is Given *)
 
-let split list length =
-  let rec s acc list l =
-    match list with
+let split xs length =
+  let rec s acc xs l =
+    match xs with
     | [] -> (List.rev acc,[])
-    | hd :: tl as initlist -> if l = 0 then (List.rev acc,initlist) else s (hd::acc) tl (l-1)
+    | hd :: tl as initxs -> if l = 0 then (List.rev acc,initxs) else s (hd::acc) tl (l-1)
   in
-  s [] list length
+  s [] xs length
 
-(* Problem 18 : Extract a slice from a list *)
+(* Problem 18 : Extract a slice from a xs *)
 
-let slice list i k =
-  let rec s acc list i range =
+let slice xs i k =
+  let rec s acc xs i range =
     match i,range with
-    | 0,0 -> List.rev (List.hd list :: acc)
-    | 0,_ -> if List.tl list = [] then
-               List.rev (List.hd list :: acc)
+    | 0,0 -> List.rev (List.hd xs :: acc)
+    | 0,_ -> if List.tl xs = [] then
+               List.rev (List.hd xs :: acc)
              else
-               s (List.hd list::acc) (List.tl list) i (range-1)
-    | _ -> s acc (List.tl list) (i-1) range
+               s (List.hd xs::acc) (List.tl xs) i (range-1)
+    | _ -> s acc (List.tl xs) (i-1) range
   in
-  if k < i || i >= length list then [] else s [] list i (k-i)
+  if k < i || i >= length xs then [] else s [] xs i (k-i)
 
-(* Problem 19 : Rotate a list N places to the left *)
+(* Problem 19 : Rotate a xs N places to the left *)
 
-let rotate list n =
-  let rec r acc n list =
-    if n = 0 then list @ (List.rev acc) else r (List.hd list::acc) (n-1) (List.tl list)
+let rotate xs n =
+  let rec r acc n xs =
+    if n = 0 then xs @ (List.rev acc) else r (List.hd xs::acc) (n-1) (List.tl xs)
   in
-  if List.length list = 0 then [] else r [] (n mod (List.length list)) list
+  if List.length xs = 0 then [] else r [] (n mod (List.length xs)) xs
 
-(* Problem 20 : Remove the K'th element from a list *)
+(* Problem 20 : Remove the K'th element from a xs *)
 
-let remove_at k list =
+let remove_at k xs =
   let rec r_at acc k = function
     | [] -> List.rev acc
     | hd :: tl -> if k = 0 then (List.rev acc) @ tl else r_at (hd::acc) (k-1) tl
   in
-  r_at [] k list
+  r_at [] k xs
 (* More performant than the example's solution *)
 
 (* Problem 21 : Insert an Element at a Given Position Into a List *)
 
-let insert_at element index list =
+let insert_at element index xs =
   let rec aux acc elem index = function (* starting to use the name 'aux' that seems common use? *)
     | [] -> (List.rev acc) @ [elem]
     | l when index = 0 -> (List.rev acc) @ [elem] @ l
     | hd :: tl -> aux (hd :: acc) elem (index-1) tl
   in
-  aux [] element index list
+  aux [] element index xs
 
 (* Problem 22 : Create a List Containing All Integers Within a Given Range *)
 (* not clear what is wanted if a > b *)
@@ -303,22 +303,22 @@ let range a b =
 
 exception Unreachable of string;;
 (* with replacement *)
-let rand_select list number =
+let rand_select xs number =
   Random.init 0;
   let rec nth index = function
     | [] -> raise (Unreachable "Uh, unreachable no?")
     | hd :: tl -> if index = 0 then [hd] else nth (index-1) tl
   in
-  let rec aux acc list n =
-    if n = 0 then acc else aux ((nth (Random.int (List.length list)) list) @ acc) list (n-1)
+  let rec aux acc xs n =
+    if n = 0 then acc else aux ((nth (Random.int (List.length xs)) xs) @ acc) xs (n-1)
   in
-  aux [] list number
+  aux [] xs number
 
 (* without replacement *)
-let rand_select list number =
+let rand_select xs number =
   Random.init 0;
-  let rec pop acc index list =
-    match list with
+  let rec pop acc index xs =
+    match xs with
     | [] -> raise (Unreachable "Uh, unreachable no?")
     | hd :: tl ->
         if index = 0 then
@@ -326,25 +326,25 @@ let rand_select list number =
         else
           pop (hd::acc) (index-1) tl
   in
-  let rec aux acc list number =
-    match list with
+  let rec aux acc xs number =
+    match xs with
     | [] -> acc
     | hd :: tl ->
         if number = 0 then
           acc
         else
-          let popped,remaining = pop [] (Random.int (List.length list)) list in
+          let popped,remaining = pop [] (Random.int (List.length xs)) xs in
           aux (popped :: acc) remaining (number-1)
   in
-  aux [] list number
+  aux [] xs number
 
 (* Problem 24 : Draw N Different Random Numbers From the Set 1..M *)
 (* There seems to be a trade-off between those two functions *)
 
 (* "Good" for small n but large m *)
 let lotto_select n m =
-  let rec is_in_acc list number =
-    match list with
+  let rec is_in_acc xs number =
+    match xs with
     | [] -> false
     | hd :: _ when number = hd -> true
     | hd :: tl -> is_in_acc tl number
@@ -364,12 +364,12 @@ let lotto_select n m = rand_select (range 1 m) n
 (* Problem 25 : Generate a Random Permutation of the Elements of a List *)
 
 (* If we remove "Random.init 0" from "rand_select" defined above:
- * let permutation list = rand_select list (List.length list)
+ * let permutation xs = rand_select xs (List.length xs)
  * else : *)
 
-let permutation list =
-  let rec pop acc index list =
-    match list with
+let permutation xs =
+  let rec pop acc index xs =
+    match xs with
     | [] -> raise (Unreachable "Uh, unreachable no?")
     | hd :: tl ->
         if index = 0 then
@@ -377,23 +377,23 @@ let permutation list =
         else
           pop (hd::acc) (index-1) tl
   in
-  let rec aux acc list number =
-    match list with
+  let rec aux acc xs number =
+    match xs with
     | [] -> acc
     | hd :: tl ->
         if number = 0 then
           acc
         else
-          let popped,remaining = pop [] (Random.int (List.length list)) list in
+          let popped,remaining = pop [] (Random.int (List.length xs)) xs in
           aux (popped :: acc) remaining (number-1)
   in
-  aux [] list (List.length list)
+  aux [] xs (List.length xs)
 
 (* Problem 26 : Generate the Combinations of K Distinct Objects Chosen From the N Elements of a List  *)
 (* Copy of the example's solution to learn about List.map. *)
-let rec extract k list =
+let rec extract k xs =
   if k <= 0 then [[]] else
-  match list with
+  match xs with
   | [] -> []
   | hd :: tl ->
       let prepend_head = List.map (fun x -> hd :: x) (extract (k-1) tl) in
@@ -403,14 +403,14 @@ let rec extract k list =
 (* Here is my first take to this problem, it is incorrect but maybe not that far of solving. To check again.*)
 (* e.g. DOES NOT work with extract 3 ["a";"b";"c";"d"] -> missing ["a";"c";"d"]
 
- * let extract k list =
- *   let rec concat acc list list2 =
- *     match list2 with
+ * let extract k xs =
+ *   let rec concat acc xs xs2 =
+ *     match xs2 with
  *     | [] -> acc
- *     | hd :: tl -> concat ((list @ [hd] ) :: acc) list tl
+ *     | hd :: tl -> concat ((xs @ [hd] ) :: acc) xs tl
  *   in
- *   let rec aux acc k list =
- *     match list with
+ *   let rec aux acc k xs =
+ *     match xs with
  *     | [] -> acc
  *     | hd :: tl ->
  *         if List.length tl >= k then
@@ -420,21 +420,21 @@ let rec extract k list =
  *   in
  *   match k with
  *   | 0 -> []
- *   | 1 -> List.rev (concat [] [] list)
- *   | _ -> List.rev (aux [] (k-1) list)
+ *   | 1 -> List.rev (concat [] [] xs)
+ *   | _ -> List.rev (aux [] (k-1) xs)
  *)
 
 (* Problem 27 : Group the elements of a set into disjoint subsets *)
-(* Hard one for me. Does not take into account permutations when giving [1;1;1] as list_numbers.
+(* Hard one for me. Does not take into account permutations when giving [1;1;1] as xs_numbers.
   i.e. 'group ["a";"b";"c"] [1;1;1]' returns [["a"];["b"];["c"]]; [["b"];["c"];["a"]]... even if are the same.
  *)
 
-let group group_list numbers_list =
-  let rec disjonction acc list1 list2 =
-    match list1 with
-    | [] -> List.rev acc @ list2
-    | h1 :: t1 as l1 -> match list2 with
-        | [] -> disjonction (h1::acc) t1 list2
+let group group_xs numbers_xs =
+  let rec disjonction acc xs1 xs2 =
+    match xs1 with
+    | [] -> List.rev acc @ xs2
+    | h1 :: t1 as l1 -> match xs2 with
+        | [] -> disjonction (h1::acc) t1 xs2
         | h2 :: t2 -> if h1 = h2 then disjonction acc t1 t2 else disjonction (h2::acc) l1 t2 in
 
   let rec aux acc g n =
@@ -449,23 +449,23 @@ let group group_list numbers_list =
             )
         |> List.flatten
   in
-  aux [] group_list numbers_list
+  aux [] group_xs numbers_xs
 
 
-(* Problem 28 :  Sorting a list of lists according to length of sublists *)
+(* Problem 28 :  Sorting a xs of xss according to length of subxss *)
 (* Given the example's solution, we "might not be allowed to use the built-in List.sort" function. At the moment, I don't mind (learning built-ins is also learning ;p). *)
 
-let length_sort list = List.sort (fun x y -> compare (List.length x) (List.length y)) list
+let length_sort xs = List.sort (fun x y -> compare (List.length x) (List.length y)) xs
 
-let frequency_sort list =
-  let original = list in
-  let rec count counter item list =
-    match list with
+let frequency_sort xs =
+  let original = xs in
+  let rec count counter item xs =
+    match xs with
     | [] -> counter
     | hd :: tl -> if List.length hd = List.length item then count (counter+1) item tl else count counter item tl
   in
-  let rec aux acc list =
-    match list with
+  let rec aux acc xs =
+    match xs with
     | [] -> acc
     | hd :: tl ->
         let c = count 0 hd original in
@@ -477,4 +477,4 @@ let frequency_sort list =
     | [] -> List.rev acc
     | (x,y) :: tl -> extract_from_tuples ([y] @ acc) tl
   in
-  extract_from_tuples [] (sort_tuples (aux [] list))
+  extract_from_tuples [] (sort_tuples (aux [] xs))
