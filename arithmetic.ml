@@ -53,3 +53,50 @@ let factors n =
   in
   f n 2
 *)
+
+(* Problem 36 : Determine the prime factors of a given positive integer (2) *)
+(* in a run-length form*)
+
+(* first implementation *)
+let factors n =
+  let rec aux acc cur_p counter n p =
+    if p > n then if counter = 0 then acc else ((cur_p,counter)::acc) else
+    if is_prime p && n mod p = 0 then
+      if p = cur_p then aux acc cur_p (counter+1) (n/p) p
+      else if counter = 0 then aux acc p 1 (n/p) p
+      else aux ((cur_p,counter)::acc) p 1 (n/p) p
+    else aux acc cur_p counter n (p+1)
+  in
+  List.rev (aux [] 0 0 n 2)
+
+(*
+(* not tail recursive *)
+let factors n =
+  let rec aux p index n =
+    if p > n then [] else
+    if is_prime p && n mod p = 0 then
+      if (n/p) mod p = 0 then aux p (index+1) (n/p) else (p,index) :: aux (p+1) 1 (n/p)
+    else
+      aux (p+1) 1 n
+  in
+  aux 2 1 n
+*)
+
+(* Problem 37 :  Calculate Euler's totient function φ(m) (improved). *)
+
+(*
+See problem "Calculate Euler's totient function φ(m)" for the definition of Euler's totient function. If the list of the prime factors of a number m is known in the form of the previous problem then the function phi(m) can be efficiently calculated as follows: Let [(p1, m1); (p2, m2); (p3, m3); ...] be the list of prime factors (and their multiplicities) of a given number m. Then φ(m) can be calculated with the following formula:
+
+φ(m) = (p1 - 1) × p1**(m1 - 1) × (p2 - 1) × p2**(m2 - 1) × (p3 - 1) × p3**(m3 - 1) × ⋯
+*)
+
+let phi_improved m =
+  let rec integer_power a b = (* a to the power of b *)
+    match b with
+    | 0 -> 1 | 1 -> a | _ -> a * (integer_power a (b-1)) in
+  let ( ** ) = integer_power in
+  let compute (p,m) = (p - 1) * (p ** (m - 1)) in
+  let rec multiply_list = function
+    | [] -> 1 | h :: t -> h * (multiply_list t) in
+  multiply_list (List.map compute (factors m))
+
