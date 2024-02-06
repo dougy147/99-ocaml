@@ -94,9 +94,63 @@ let phi_improved m =
   let rec integer_power a b = (* a to the power of b *)
     match b with
     | 0 -> 1 | 1 -> a | _ -> a * (integer_power a (b-1)) in
-  let ( ** ) = integer_power in
+  let ( ** ) = integer_power in (* defining your own operators is wonderful *)
   let compute (p,m) = (p - 1) * (p ** (m - 1)) in
   let rec multiply_list = function
     | [] -> 1 | h :: t -> h * (multiply_list t) in
   multiply_list (List.map compute (factors m))
+
+
+(* Problem 38 : Compare the two methods of calculating Euler's totient function. *)
+
+let timeit f x =
+  let start = Sys.time() in
+  f x;
+  Sys.time() -. start
+
+(* Problem 39 : A list of prime numbers. *)
+
+let all_primes infb supb =
+  let rec aux acc infb supb =
+    if infb = supb then List.rev acc
+    else
+      aux ((if is_prime infb then [infb] else []) @ acc) (infb+1) supb
+  in
+  aux [] infb supb
+
+(* Problem 40 : Goldbach's conjecture *)
+
+(* Goldbach's conjecture says that every positive even number greater than 2 is the sum of two prime numbers. Example: 28 = 5 + 23. It is one of the most famous facts in number theory that has not been proved to be correct in the general case. It has been numerically confirmed up to very large numbers. Write a function to find the two prime numbers that sum up to a given even integer. *)
+
+let goldbach x =
+  if x mod 2 != 0 then failwith "Not an even number" else
+  let rec aux p x =
+    if (is_prime p) && (is_prime (x-p)) then (p,x-p)
+    else aux (p+1) x
+  in
+  aux 2 x
+
+
+(* Problem 41 : A list of Goldbach compositions. *)
+
+let goldbach_list infb supb =
+  let rec aux acc i s =
+    if i > s then List.rev acc else
+    if i mod 2 = 0 then aux ((i,goldbach i)::acc) (i+2) s
+    else aux acc (i+1) s
+  in
+  aux [] infb supb
+
+(* without List.filter built-in *)
+let goldbach_limit infb supb maxval =
+  let rec aux acc m = function
+    | [] -> List.rev acc
+    | (n, (x,y) ) as hd :: tl when x >= m && y >= m -> aux (hd :: acc) m tl
+    | _ :: tl -> aux acc m tl
+  in
+  aux [] maxval (goldbach_list infb supb)
+
+(* with List.filter *)
+let goldbach_limit infb supb maxval =
+  List.filter (fun (n, (x,y)) -> x >= maxval && y >= maxval ) (goldbach_list infb supb)
 
