@@ -112,7 +112,7 @@ let timeit f x =
 
 let all_primes infb supb =
   let rec aux acc infb supb =
-    if infb = supb then List.rev acc
+    if infb > supb then List.rev acc
     else
       aux ((if is_prime infb then [infb] else []) @ acc) (infb+1) supb
   in
