@@ -42,3 +42,16 @@ let table var_list expr =
   let bool_states = generate_states (List.length var_list) in
   let states = List.map (fun x -> List.combine var_list x) bool_states in
   List.map (fun x -> (x, parse_expr x expr)) states
+
+
+(* Problem 49:  Gray code *)
+(* order is important *)
+let rec gray n =
+  if n = 1 then ["0";"1"] else
+    List.map (fun x ->
+        if x = "1" then
+          List.rev (List.map (fun y -> x ^ y) (gray (n-1)))
+        else
+          List.map (fun y -> x ^ y) (gray (n-1))) (gray 1)
+    |> List.flatten
+    
