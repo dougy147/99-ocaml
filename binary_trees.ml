@@ -29,4 +29,25 @@ let is_symmetric tree = is_mirror tree tree
 
 (* Problem 57 : Binary search trees (dictionnaries) *)
 
+let construct xs =
+  let rec insert elem tree=
+    match tree with
+    | Empty -> Node (elem, Empty, Empty)
+    | Node (x,l,r) ->
+       if x = elem then tree else
+       Node (x,(if elem < x then insert elem l else l),(if elem > x then insert elem r else r))
+  in
+  let rec aux xs tree =
+    match xs with
+    | [] -> tree
+    | hd :: tl -> aux tl (insert hd tree)
+  in
+  aux xs Empty
+
+(* Problem 58 : Generate-and-test paradigm *)
+
+let sym_cal_trees n =
+  List.filter (fun x -> is_symmetric x) (cbal_tree n)
+
+(* Problem 59 : Construct height-balanced binary trees *)
 
