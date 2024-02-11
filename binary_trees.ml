@@ -51,3 +51,31 @@ let sym_cal_trees n =
 
 (* Problem 59 : Construct height-balanced binary trees *)
 
+let rec hbal_tree h =
+  if h = 0 then [Empty] else
+  if h = 1 then [Node('x',Empty,Empty)] else
+    let rec multiply_sides left right tree =
+      List.fold_left (fun acc r -> List.fold_left (fun acc' l -> Node ('x',l,r) :: acc') acc left) tree right
+    in
+    let diff1 = hbal_tree (h-1) and diff2 = hbal_tree (h-2) in
+    multiply_sides diff1 diff2 (multiply_sides diff2 diff1 (multiply_sides diff1 diff1 []))
+
+
+(* Problem 60 : Construct height-balanced binary trees with a given number of nodes *)
+
+let max_nodes h = Int.of_float (2. ** (Float.of_int h) -. 1.)
+
+(* I am discovering the Fibonnacci sequence in the construction of height-balanced trees with minimal number of nodes *)
+                                  
+let rec min_nodes h =
+  if h = 1 then 1 else
+  let fib n =
+    let rec f a b i n =
+      if i = n then a else
+      f b (a+b) (i+1) n
+    in
+    f 0 1 0 n
+  in
+  min_nodes (h-1) + fib h
+
+let min_height n = Int.of_float (ceil (Float.log2 (Float.of_int (n) +. 1.)))
